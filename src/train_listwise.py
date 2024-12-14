@@ -1,4 +1,7 @@
 import math
+import os
+
+os.environ["UNSLOTH_RETURN_LOGITS"] = "1"
 import string
 from functools import partial
 from pathlib import Path
