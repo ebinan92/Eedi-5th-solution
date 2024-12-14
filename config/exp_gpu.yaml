@@ -1,0 +1,117 @@
+input_dir: "input"
+save_dir: "exp_output"
+best_model_dir: "best_models"
+
+# generate_question.py
+generate_question:
+  model_name: "google/gemini-flash-1.5"
+  save_name: "additonal_question.csv"
+  embedding_model: "dunzhang/stella_en_1.5B_v5"
+  num_shot: 4
+  sem_number: 100 # number of conccurent
+
+# split_fold.py
+split_fold:
+  n_split: 5
+  add_data_name: "additonal_question.csv"
+  seed: 42
+  save_name: "data.csv"
+
+# distill.py
+distill:
+  model_name: "Qwen/Qwen2.5-32B-Instruct-AWQ"
+  input_name: "data.csv"
+  save_name: "data_kd.csv"
+
+# train_biencoder.py
+train_biencoder:
+  model_name: "dunzhang/stella_en_1.5B_v5"
+  input_name: "data_kd.csv"
+  output_dir: "output_bi_1.5B"
+  is_lora: true
+  load_in_4bit: false
+  mini_batch_size: 4
+  seed: 42
+  lora_config:
+    r: 48
+    lora_alpha: 96
+  hard_negative_params:
+    range_min: 512
+    num_negatives: 2
+    batch_size: 32
+  train_args:
+    num_train_epochs: 1.0
+    per_device_train_batch_size: 640
+    per_device_eval_batch_size: 640
+    learning_rate: 0.001
+    warmup_steps: 0
+    eval_strategy: steps
+    save_only_model: true
+    eval_steps: 2
+    metric_for_best_model: val_cosine_recall@100
+    load_best_model_at_end: true
+    greater_is_better: true
+    save_strategy: steps
+    save_steps: 2
+    lr_scheduler_type: "cosine"
+    save_total_limit: 1
+    logging_steps: 1
+    report_to: wandb
+    bf16: true
+
+# inference_biencoder.py
+inference_biencoder:
+  model_output_dir: "output_bi_1.5B"
+  input_name: "data_kd.csv"
+  save_name: "data_bi.csv"
+  model_name: "dunzhang/stella_en_1.5B_v5"
+  is_lora: true
+  load_in_4bit: false
+  batch_size: 32
+
+# train_listwise.py
+train_listwise:
+  model_name: "unsloth/Qwen2.5-32B-Instruct"
+  input_name: "data_bi.csv"
+  output_dir: "output_listwise"
+  add_na: true # add NA to the options
+  num_choice: 52
+  num_slide: 52
+  train_negative_topk: 208 # this is only used when add_na is true
+  train_topk: 208
+  inference_topk: 52
+  max_length: 1900
+  seed: 42
+  load_in_4bit: false
+  lora_config:
+    r: 24
+    lora_alpha: 48
+  train_args:
+    per_device_train_batch_size: 4
+    per_device_eval_batch_size: 1
+    gradient_accumulation_steps: 2
+    num_train_epochs: 1.0
+    learning_rate: 5e-5
+    warmup_steps: 10
+    logging_steps: 10
+    overwrite_output_dir: true
+    save_total_limit: 2
+    lr_scheduler_type: "cosine"
+    report_to: "wandb"
+    bf16: true
+    eval_strategy: "steps"
+    metric_for_best_model: "loss"
+
+# inference_listwise.py
+inference_listwise:
+  model_output_dir: "output_listwise"
+  input_name: "data_bi.csv"
+  save_name: "data_listwise.csv"
+  batch_size: 2
+  seed: 42
+  topk: 104
+  num_choice: 52
+  num_slide: 52
+  add_na: True
+  max_length: 2048
+  load_in_4bit: false

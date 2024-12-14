@@ -1,0 +1,25 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# dotenv
+.env
+
+# outputを含むディレクトリ内の全てのファイルを無視
+output*/
+!output*/*.csv
+
+
+# wandb
+wandb/
+
+# other
+*.out
+*.ipynb

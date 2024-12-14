@@ -1,0 +1,40 @@
+[project]
+name = "eedi-5th-solution"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "auto-gptq>=0.7.1",
+    "easy-dict>=0.1.1",
+    "ipykernel>=6.29.5",
+    "kagglehub>=0.3.3",
+    "matplotlib>=3.9.2",
+    "omegaconf>=2.3.0",
+    "openai>=1.52.2",
+    "optimum>=1.23.3",
+    "pandarallel>=1.6.5",
+    "python-dotenv>=1.0.1",
+    "ruff>=0.7.1",
+    "sentence-transformers>=3.2.1",
+    "torch==2.4.0+cu124",
+    "typer>=0.12.5",
+    "unsloth>=2024.10.7",
+    "vllm>=0.6.1.post2",
+    "wandb>=0.18.5",
+]
+
+[tool.uv]
+package = false
+
+[[tool.uv.index]]
+name = "torch-cuda"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+    { index = "torch-cuda"},
+]
+[tool.ruff]
+line-length = 99
